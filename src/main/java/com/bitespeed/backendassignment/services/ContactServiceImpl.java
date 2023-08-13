@@ -140,8 +140,10 @@ public class ContactServiceImpl implements ContactService {
 			HashSet<String> phoneNumbers = new HashSet<String>();
 			HashSet<Long> secondaryContactIds = new HashSet<Long>();
 			
-			if (contacts.size() == 2 && 
-					(contacts.get(0).getLinkPrecedence().equals("primary") == contacts.get(0).getLinkPrecedence().equals("primary"))) {
+			if (
+					contacts.size() == 2 && 
+					(contacts.get(0).getLinkPrecedence().equals("primary")) && (contacts.get(1).getLinkPrecedence().equals("primary"))
+				) {
 				
 				contacts.get(1).setLinkPrecedence("secondary");
 				contacts.get(1).setLinkedId(contacts.get(0).getId());
@@ -268,6 +270,7 @@ public class ContactServiceImpl implements ContactService {
 		}
 		
 	}
+	
 	private ResponseEntity<ContactResponse> getPartialReponse(List<Contact> contacts) {
 		
 		HashSet<String> emails = new HashSet<String>();
