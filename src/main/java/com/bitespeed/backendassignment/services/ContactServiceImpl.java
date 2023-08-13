@@ -140,6 +140,17 @@ public class ContactServiceImpl implements ContactService {
 			HashSet<String> phoneNumbers = new HashSet<String>();
 			HashSet<Long> secondaryContactIds = new HashSet<Long>();
 			
+			if (contacts.size() == 2 && 
+					(contacts.get(0).getLinkPrecedence().equals("primary") == contacts.get(0).getLinkPrecedence().equals("primary"))) {
+				
+				contacts.get(1).setLinkPrecedence("secondary");
+				contacts.get(1).setLinkedId(contacts.get(0).getId());
+				contactRepository.save(contacts.get(1));
+				primaryContact = contacts.get(1);
+				
+				return getPartialReponse(contacts);
+			}
+			
 			primaryContact = contacts.get(0);
 			
 			if (primaryContact.getLinkedId() != null) {
@@ -148,7 +159,7 @@ public class ContactServiceImpl implements ContactService {
 			
 			List<Contact> otherContacts = contactRepository.findAll();
 			otherContacts.forEach((c) -> {
-				
+
 				if (primaryContact.getId().equals(c.getLinkedId()) && c.getLinkPrecedence().equals("secondary")) {
 					
 					if (c.getEmail() != null) {
@@ -225,6 +236,8 @@ public class ContactServiceImpl implements ContactService {
 		}
 	}
 	
+	private 
+	
 	private ResponseEntity<ContactResponse> generatePrimaryResponse(Contact contact) {
 		
 		ContactCustomResponse contactResponse = new ContactCustomResponse();
@@ -257,5 +270,40 @@ public class ContactServiceImpl implements ContactService {
 		}
 		
 	}
-	
+	private ResponseEntity<ContactResponse> getPartialReponse(List<Contact> contacts) {
+		
+		HashSet<String> emails = new HashSet<String>();
+		HashSet<String> phoneNumbers = new HashSet<String>();
+		HashSet<Long> secondaryContactIds = new HashSet<Long>();
+		ContactCustomResponse contactResponse = new ContactCustomResponse();
+		
+		try {
+			
+			contacts.forEach((c) -> {
+				if (c.getEmail() != null) {
+					emails.add(c.getEmail());
+				}
+				
+				if (c.getPhoneNumber() != null) {
+					phoneNumbers.add(c.getPhoneNumber());
+				}
+				
+				if (c.getLinkPrecedence() != null && c.getLinkPrecedence().equalsIgnoreCase("secondary")) {
+					secondaryContactIds.add(c.getId());
+				}
+			});
+			
+			contactResponse.setEmails(emails.stream().collect(Collectors.toList()));
+			contactResponse.setPhoneNumbers(phoneNumbers.stream().collect(Collectors.toList()));
+			contactResponse.setPrimaryContactId(contacts.get(0).getId());
+			contactResponse.setSecondaryContactIds(secondaryContactIds.stream().collect(Collectors.toList()));
+			
+			return new ResponseEntity<ContactResponse>(new ContactResponse(contactResponse), HttpStatus.OK);
+		
+		} catch (Exception e) {
+			System.err.print("Error while saving the Secondary Partial Contact Details" + e.getLocalizedMessage());
+			return new ResponseEntity<ContactResponse>(new ContactResponse(contactResponse), HttpStatus.OK);
+		}
+		
+	}
 }
