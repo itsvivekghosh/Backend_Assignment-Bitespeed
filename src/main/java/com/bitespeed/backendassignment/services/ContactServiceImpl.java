@@ -236,8 +236,6 @@ public class ContactServiceImpl implements ContactService {
 		}
 	}
 	
-	private 
-	
 	private ResponseEntity<ContactResponse> generatePrimaryResponse(Contact contact) {
 		
 		ContactCustomResponse contactResponse = new ContactCustomResponse();
