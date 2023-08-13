@@ -9,7 +9,7 @@ RUN mvn clean package -Pprod -DskipTests
 # Package stage
 #
 FROM openjdk:17-jdk-slim-buster
-COPY --from=build /target/demo-0.0.1-SNAPSHOT.jar demo.jar
+COPY --from=build /target/Backend-Assignment-0.0.1-SNAPSHOT.jar Backend-Assignment.jar
 # ENV PORT=8080
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "demo.jar"]
+ENTRYPOINT ["java", "-jar", "Backend-Assignment.jar"]
