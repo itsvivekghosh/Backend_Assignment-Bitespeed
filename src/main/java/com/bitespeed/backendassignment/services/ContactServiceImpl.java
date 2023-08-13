@@ -2,6 +2,7 @@ package com.bitespeed.backendassignment.services;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -103,6 +104,9 @@ public class ContactServiceImpl implements ContactService {
 			String email = contact.getEmail();
 			String phoneNumber = contact.getPhoneNumber();
 			
+			if (email == null) email = "";
+			if (phoneNumber == null) phoneNumber = "";
+			
 			List<Contact> contactList = contactRepository.findByContactsEmailAddressOrPhoneNumber(email, phoneNumber);
 
 			if (!contactList.isEmpty()) {
@@ -121,6 +125,8 @@ public class ContactServiceImpl implements ContactService {
 	
 	Boolean isEmailSame = false;
 	Boolean isPhoneSame = false;
+	Contact primaryContact = null;
+	
 	private ResponseEntity<ContactResponse> generateSecondaryResponse(Contact contact, List<Contact> contacts) {
 
 		ContactCustomResponse contactResponse = new ContactCustomResponse();
@@ -133,32 +139,52 @@ public class ContactServiceImpl implements ContactService {
 			HashSet<String> emails = new HashSet<String>();
 			HashSet<String> phoneNumbers = new HashSet<String>();
 			HashSet<Long> secondaryContactIds = new HashSet<Long>();
-
-			Long primaryId = contacts.isEmpty() ? null : contacts.get(0).getId();
 			
-			contacts.forEach((c) -> {
+			primaryContact = contacts.get(0);
+			
+			if (primaryContact.getLinkedId() != null) {
+				primaryContact = contactRepository.findById(primaryContact.getLinkedId()).get();
+			}
+			
+			List<Contact> otherContacts = contactRepository.findAll();
+			otherContacts.forEach((c) -> {
 				
-				System.out.println(c.getEmail() + c.getPhoneNumber() + c.getLinkPrecedence());
-
+				if (primaryContact.getId().equals(c.getLinkedId()) && c.getLinkPrecedence().equals("secondary")) {
 					
-				ids.add(c.getId());
-				
-				if (c.getEmail() != null)
-					emails.add(c.getEmail());
-				
-				if (c.getPhoneNumber() != null)
-					phoneNumbers.add(c.getPhoneNumber());
+					if (c.getEmail() != null) {
+						emails.add(c.getEmail());
+					}
+					
+					if (c.getPhoneNumber() != null) {
+						phoneNumbers.add(c.getPhoneNumber());
+					}
+					
+					if (c.getLinkPrecedence() != null && c.getLinkPrecedence().equalsIgnoreCase("secondary")) {
+						secondaryContactIds.add(c.getId());
+					}
+					
+					ids.add(c.getId());
+					
+				}
 
-				if (c.getLinkPrecedence() != null && c.getLinkPrecedence().equalsIgnoreCase("secondary")) {
-					secondaryContactIds.add(c.getId());
+				if (contact.getEmail() != null) {
+					if (c.getEmail() != null) {
+						emails.add(c.getEmail());
+					}
+					
+					if (c.getPhoneNumber() != null) {
+						phoneNumbers.add(c.getPhoneNumber());
+					}
 				}
 				
-				if (c.getEmail().equals(contact.getEmail())) {
-					isEmailSame = true;
-				}
-				
-				if (c.getPhoneNumber().equals(contact.getPhoneNumber())) {
-					isPhoneSame = true;
+				if (contact.getPhoneNumber() != null) {
+					if (c.getEmail() != null) {
+						emails.add(c.getEmail());
+					}
+					
+					if (c.getPhoneNumber() != null) {
+						phoneNumbers.add(c.getPhoneNumber());
+					}
 				}
 				
 			});
@@ -169,20 +195,26 @@ public class ContactServiceImpl implements ContactService {
 			if (contact.getEmail() != null)
 				emails.add(contact.getEmail());
 			
-
 			contact.setLinkPrecedence("secondary");
-			contact.setLinkedId(primaryId);
+			contact.setLinkedId(primaryContact.getId());
 			
 			Contact createdContact = null;
-			if ((!isEmailSame || !isPhoneSame))
-				createdContact = contactRepository.save(contact);
+			createdContact = contactRepository.save(contact);
 			
 			if (createdContact != null)
 				secondaryContactIds.add(createdContact.getId());
 			
-			contactResponse.setEmails(emails.stream().collect(Collectors.toList()));
-			contactResponse.setPhoneNumbers(phoneNumbers.stream().collect(Collectors.toList()));
-			contactResponse.setPrimaryContactId(primaryId);
+			emails.remove(primaryContact.getEmail());
+			List<String> emailList = emails.stream().collect(Collectors.toList());
+			emailList.add(0, primaryContact.getEmail());
+
+			phoneNumbers.remove(primaryContact.getPhoneNumber());
+			List<String> phoneNumberList = phoneNumbers.stream().collect(Collectors.toList());
+			phoneNumberList.add(0, primaryContact.getPhoneNumber());
+			
+			contactResponse.setEmails(emailList);
+			contactResponse.setPhoneNumbers(phoneNumberList);
+			contactResponse.setPrimaryContactId(primaryContact.getId());
 			contactResponse.setSecondaryContactIds(secondaryContactIds.stream().collect(Collectors.toList()));
 			
 			return new ResponseEntity<ContactResponse>(new ContactResponse(contactResponse), HttpStatus.OK);
@@ -203,10 +235,14 @@ public class ContactServiceImpl implements ContactService {
 			Contact createdContact = contactRepository.save(contact);
 			
 			List<String> emails = new ArrayList<>();
-			emails.add(contact.getEmail());
+			
+			if (contact.getEmail() != null)
+				emails.add(contact.getEmail());
 			
 			List<String> phoneNumbers = new ArrayList<>();
-			phoneNumbers.add(contact.getPhoneNumber());
+			
+			if (contact.getPhoneNumber() != null)
+				phoneNumbers.add(contact.getPhoneNumber());
 			
 			contactResponse.setEmails(emails);
 			contactResponse.setPhoneNumbers(phoneNumbers);

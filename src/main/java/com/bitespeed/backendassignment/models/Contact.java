@@ -48,10 +48,10 @@ public class Contact {
 	private String linkPrecedence;
 	
 	@CreationTimestamp
-    @Column(name = "created_at", nullable = true, updatable = false)
+	@Column(name = "created_at", nullable = true, updatable = false)
 	private LocalDateTime created_at;                   
 	
-    @Column(name = "updated_at")
+	@Column(name = "updated_at")
 	private LocalDateTime updated_at;              
 	
 	@Column(name = "deleted_at")
