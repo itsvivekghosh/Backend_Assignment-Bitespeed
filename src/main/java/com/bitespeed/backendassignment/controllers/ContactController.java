@@ -57,7 +57,7 @@ public class ContactController {
 		}
 	}
 	
-	@PostMapping("/contact")
+	@PostMapping("/identify")
 	public ResponseEntity<ContactResponse> createContact(@RequestBody Contact contact) {
 		
 		try {
