@@ -45,8 +45,18 @@ public class ContactServiceImpl implements ContactService {
 	
 	@Override
 	public ResponseEntity<Contact> getByContactId(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+
+
+		try {
+			
+			Contact contact = contactRepository.findById(id).get();
+			return new ResponseEntity<>(contact, HttpStatus.OK);
+
+		} catch (Exception e) {
+			System.err.println("Error while getting the contact by ID: " + id +" , Error: " + e.getLocalizedMessage());
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
 	}
 
 	@Override

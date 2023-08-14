@@ -44,6 +44,18 @@ public class ContactController {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+
+	@GetMapping("/contact/{id}")
+	public ResponseEntity<Contact> getContactById(@PathVariable("id") Long id) {
+		
+		try {
+			
+			return contactService.getByContactId(id);
+			
+		} catch (Exception e) {
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 	
 	@PostMapping("/contact")
 	public ResponseEntity<ContactResponse> createContact(@RequestBody Contact contact) {
