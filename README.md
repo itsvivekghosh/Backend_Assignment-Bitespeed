@@ -19,12 +19,12 @@ curl --location 'localhost:8080/identify' \
 
 Use the CURL for Prod (This GET request gets all the contacts as a List):
 ```sh
-curl --location 'https://orange-space-happiness-4wjvwrrpvpg2q446-8080.app.github.dev/contacts' \
+curl --location 'https://backend-assignment-34db.onrender.com/contacts' \
 ```
 
 Use the CURL for Prod (This POST request gets Create the Contact as a List):
 ```sh
-curl --location 'https://orange-space-happiness-4wjvwrrpvpg2q446-8080.app.github.dev/identify' \
+curl --location 'https://backend-assignment-34db.onrender.com/identify' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "email": "lorraine@hillvalley.edu",
